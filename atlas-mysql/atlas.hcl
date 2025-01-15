@@ -13,5 +13,7 @@ env "local" {
   dev = "docker://mysql/8/example"
 }
 
+# atlas schema apply --env local
 # atlas migrate apply --env local
 # atlas migrate diff migrate --env local
+# atlas schema inspect --env local >> schema.hcl
