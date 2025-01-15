@@ -6,7 +6,8 @@ table "users" {
   }
   column "name" {
     null = true
-    type = varchar(100)
+    type = varchar(255)
+    default = sql("NULL")
   }
   column "author_id" {
     null = true
