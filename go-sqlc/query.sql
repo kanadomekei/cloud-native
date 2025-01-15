@@ -1,17 +1,17 @@
 -- name: GetAuthor :one
-SELECT *
+SELECT id, name, bio, age
 FROM authors
 WHERE id = ?
 LIMIT 1;
 
 -- name: ListAuthors :many
-SELECT *
+SELECT id, name, bio, age
 FROM authors
 ORDER BY name;
 
 -- name: CreateAuthor :execresult
-INSERT INTO authors (name, bio)
-VALUES (?, ?);
+INSERT INTO authors (name, bio, age)
+VALUES (?, ?, ?);
 
 -- name: GetCreatedAuthor :one
 SELECT *

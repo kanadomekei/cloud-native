@@ -11,17 +11,18 @@ import (
 )
 
 const createAuthor = `-- name: CreateAuthor :execresult
-INSERT INTO authors (name, bio)
-VALUES (?, ?)
+INSERT INTO authors (name, bio, age)
+VALUES (?, ?, ?)
 `
 
 type CreateAuthorParams struct {
 	Name string
 	Bio  sql.NullString
+	Age  sql.NullInt32
 }
 
 func (q *Queries) CreateAuthor(ctx context.Context, arg CreateAuthorParams) (sql.Result, error) {
-	return q.db.ExecContext(ctx, createAuthor, arg.Name, arg.Bio)
+	return q.db.ExecContext(ctx, createAuthor, arg.Name, arg.Bio, arg.Age)
 }
 
 const deleteAuthor = `-- name: DeleteAuthor :exec
