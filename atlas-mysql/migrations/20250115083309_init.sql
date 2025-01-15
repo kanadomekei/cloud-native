@@ -1,0 +1,6 @@
+-- Create "users" table
+CREATE TABLE `users` (`id` int NOT NULL, `name` varchar(100) NULL, `author_id` int NULL, PRIMARY KEY (`id`)) CHARSET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
+-- Create "posts" table
+CREATE TABLE `posts` (`id` int NOT NULL AUTO_INCREMENT, `title` varchar(255) NOT NULL, `content` text NOT NULL, `user_id` int NOT NULL, `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP, `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY (`id`), INDEX `post_author_fk` (`user_id`), INDEX `title_idx` (`title`), CONSTRAINT `post_author_fk` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON UPDATE NO ACTION ON DELETE NO ACTION) CHARSET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
+-- Create "comments" table
+CREATE TABLE `comments` (`id` int NOT NULL AUTO_INCREMENT, `content` text NOT NULL, `user_id` int NOT NULL, `post_id` int NOT NULL, `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY (`id`), INDEX `comment_author_fk` (`user_id`), INDEX `comment_post_fk` (`post_id`), CONSTRAINT `comment_author_fk` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON UPDATE NO ACTION ON DELETE NO ACTION, CONSTRAINT `comment_post_fk` FOREIGN KEY (`post_id`) REFERENCES `posts` (`id`) ON UPDATE NO ACTION ON DELETE NO ACTION) CHARSET utf8mb4 COLLATE utf8mb4_0900_ai_ci;

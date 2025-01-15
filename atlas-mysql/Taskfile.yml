@@ -1,0 +1,27 @@
+version: '3'
+
+tasks:
+  create-table:
+    cmds:
+      - docker exec atlas-mysql mysql -u atlas_user -patlas_pass -e 'CREATE table atlas_db.users(id int PRIMARY KEY, name varchar(100))'
+
+  inspect-schema:
+    cmds:
+      - atlas schema inspect -u "mysql://atlas_user:atlas_pass@localhost:3306/atlas_db" > schema.hcl
+
+  setup:
+    cmds:
+      - task: create-table
+      - task: inspect-schema
+
+  apply-schema:
+    cmds:
+      - atlas schema apply -u "mysql://atlas_user:atlas_pass@localhost:3306/atlas_db" --to file://schema.hcl
+
+  generate-migration:
+    cmds:
+      - atlas migrate diff init --dir "file://migrations" --to "file://schema.hcl" --dev-url "docker://mysql/8/example"
+
+  apply-migration:
+    cmds:
+      - atlas migrate apply --url "mysql://atlas_user:atlas_pass@localhost:3306/atlas_db" --dir "file://migrations"
