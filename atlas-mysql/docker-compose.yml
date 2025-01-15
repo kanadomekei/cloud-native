@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: atlas-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: atlas_db
+      MYSQL_USER: atlas_user
+      MYSQL_PASSWORD: atlas_pass
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    command: --default-authentication-plugin=mysql_native_password
+
+volumes:
+  mysql-data:
+
+# docker exec -it atlas-mysql mysql -u atlas_user -patlas_pass atlas_db
+# mysql -h 127.0.0.1 -P 3306 -u atlas_user -patlas_pass atlas_db
