@@ -17,3 +17,4 @@ env "local" {
 # atlas migrate apply --env local
 # atlas migrate diff migrate --env local
 # atlas schema inspect --env local >> schema.hcl
+# atlas schema inspect --web --env local
