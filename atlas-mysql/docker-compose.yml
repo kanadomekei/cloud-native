@@ -14,9 +14,31 @@ services:
     volumes:
       - mysql-data:/var/lib/mysql
     command: --default-authentication-plugin=mysql_native_password
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "atlas_user", "--password=atlas_pass"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  migrate:
+    image: arigaio/atlas:latest
+    command: >
+      migrate apply
+      --url mysql://atlas_user:atlas_pass@mysql:3306/atlas_db
+    volumes:
+      - ./migrations:/migrations
+    depends_on:
+      mysql:
+        condition: service_healthy
+    restart: on-failure
 
 volumes:
   mysql-data:
+
+networks:
+  default:
+    name: atlas-network
 
 # docker exec -it atlas-mysql mysql -u atlas_user -patlas_pass atlas_db
 # mysql -h 127.0.0.1 -P 3306 -u atlas_user -patlas_pass atlas_db
