@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 
@@ -13,6 +14,15 @@ type Person struct {
 	Name     string               `json:"name"`
 	Surname  string               `json:"surname"`
 	Location models.GeometryPoint `json:"location"`
+}
+
+// 整形して出力する関数
+func prettyPrint(prefix string, v interface{}) {
+	jsonData, err := json.MarshalIndent(v, "", "    ")
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Printf("%s:\n%s\n", prefix, string(jsonData))
 }
 
 func main() {
@@ -48,19 +58,8 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// Personの作成（マップを使用）
-	person1, err := surrealdb.Create[Person](db, models.Table("persons"), map[interface{}]interface{}{
-		"Name":     "山田",
-		"Surname":  "太郎",
-		"Location": models.NewGeometryPoint(139.7673068, 35.6809591), // 東京駅の座標
-	})
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Printf("マップで作成したPerson: %+v\n", person1)
-
 	// Personの作成（構造体を使用）
-	person2, err := surrealdb.Create[Person](db, models.Table("persons"), Person{
+	person1, err := surrealdb.Create[Person](db, models.Table("persons"), Person{
 		Name:     "鈴木",
 		Surname:  "花子",
 		Location: models.NewGeometryPoint(135.4983028, 34.7024854), // 大阪駅の座標
@@ -68,19 +67,12 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Printf("構造体で作成したPerson: %+v\n", person2)
+	prettyPrint("作成したPerson", person1)
 
 	// 全てのPersonを取得
 	persons, err := surrealdb.Select[[]Person](db, models.Table("persons"))
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Printf("全てのPerson: %+v\n", persons)
-
-	// IDによる特定のPersonの取得
-	person, err := surrealdb.Select[Person](db, *person1.ID)
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Printf("IDで取得したPerson: %+v\n", person)
+	prettyPrint("全てのPerson", persons)
 }
