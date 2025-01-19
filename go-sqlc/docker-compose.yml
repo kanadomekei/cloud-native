@@ -1,6 +1,18 @@
 version: '3.8'
 
 services:
+  pmm-server:
+    image: percona/pmm-server:2
+    container_name: pmm-server
+    ports:
+      - "443:443"
+      - "80:80"
+    environment:
+      - PMM_DEBUG=1
+    volumes:
+      - pmm-data:/srv
+    restart: always
+
   mysql:
     image: mysql:8.0
     container_name: atlas-mysql
@@ -13,13 +25,37 @@ services:
       - "3306:3306"
     volumes:
       - mysql-data:/var/lib/mysql
-    command: --default-authentication-plugin=mysql_native_password
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    command: >
+      --default-authentication-plugin=mysql_native_password
+      --performance-schema=ON
+      --innodb_monitor_enable=all
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "atlas_user", "--password=atlas_pass"]
       interval: 10s
       timeout: 5s
       retries: 10
       start_period: 30s
+
+  pmm-client:
+    image: percona/pmm-client:2
+    container_name: pmm-client
+    environment:
+      - PMM_AGENT_SERVER_ADDRESS=pmm-server:443
+      - PMM_AGENT_SERVER_USERNAME=admin
+      - PMM_AGENT_SERVER_PASSWORD=admin
+      - PMM_AGENT_SERVER_INSECURE_TLS=1
+      - PMM_AGENT_SETUP=1
+      - PMM_AGENT_CONFIG_FILE=pmm-agent.yaml
+    depends_on:
+      - pmm-server
+      - mysql
+    command: >
+      /bin/bash -c "
+        sleep 20 &&
+        pmm-admin config --server-insecure-tls --server-url=https://admin:admin@pmm-server:443 &&
+        pmm-admin add mysql --query-source=perfschema --username=pmm --password=pmm-pass --host=mysql --port=3306 --service-name=atlas-mysql
+      "
 
   migrate:
     image: arigaio/atlas:latest
@@ -35,6 +71,7 @@ services:
 
 volumes:
   mysql-data:
+  pmm-data:
 
 networks:
   default:
